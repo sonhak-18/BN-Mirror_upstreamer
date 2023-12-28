@@ -1,17 +1,8 @@
 from pyrogram.handlers import MessageHandler, CallbackQueryHandler
 from pyrogram.filters import command, regex
-from aiofiles.os import remove, path as aiopath
+from aiofiles.os import remove as aioremove, path as aiopath
 
-from bot import (
-    bot,
-    aria2,
-    task_dict,
-    task_dict_lock,
-    OWNER_ID,
-    user_data,
-    LOGGER,
-    config_dict,
-)
+from bot import bot, aria2, task_dict, task_dict_lock, OWNER_ID, user_data, LOGGER
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.message_utils import (
@@ -24,9 +15,6 @@ from bot.helper.ext_utils.status_utils import getTaskByGid, MirrorStatus
 
 
 async def select(_, message):
-    if not config_dict["BASE_URL"]:
-        await sendMessage(message, "Base URL not defined!")
-        return
     user_id = message.from_user.id
     msg = message.text.split()
     if len(msg) > 1:
@@ -124,7 +112,7 @@ async def get_confirm(_, query):
                         for f_path in f_paths:
                             if await aiopath.exists(f_path):
                                 try:
-                                    await remove(f_path)
+                                    await aioremove(f_path)
                                 except:
                                     pass
                 if not task.queued:
@@ -134,7 +122,7 @@ async def get_confirm(_, query):
                 for f in res:
                     if f["selected"] == "false" and await aiopath.exists(f["path"]):
                         try:
-                            await remove(f["path"])
+                            await aioremove(f["path"])
                         except:
                             pass
                 if not task.queued:
